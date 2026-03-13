@@ -180,3 +180,20 @@ SELECT * FROM vw_emprestimos_bibliotecarios;
 CREATE VIEW vw_emprestimos_alunos AS
 SELECT
     Emprestimo.id_emprestimo,
+
+
+DELIMITER //
+CREATE PROCEDURE AdicionarAluno(IN nome_pessoa VARCHAR(100), IN email_pessoa varchar(100),IN cpf char(11), IN matricula VARCHAR(20),IN  turma VARCHAR(10))
+BEGIN
+	INSERT INTO pessoa (nome, email, cpf)
+	VALUES (nome_pessoa, email_pessoa, cpf);
+	
+	INSERT INTO aluno (matricula, turma, id_pessoa)
+	VALUES (matricula, turma, LAST_INSERT_ID());
+END //
+
+DELIMITER ;
+
+CALL AdicionarAluno ("brunna", "brunna@ifbaiano", "253644448", "1234123412", "1º Ano C");
+
+	
