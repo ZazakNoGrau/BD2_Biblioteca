@@ -204,5 +204,55 @@ END //
 DELIMITER ;
 
 CALL AdicionarAluno ("brunna", "brunna@ifbaiano", "253644448", "1234123412", "1º Ano C");
-
 	
+--TRIGGERS para mudança de status de emprestimo. (210:258)
+
+DELIMITER //
+
+CREATE TRIGGER tg_atualizar_status_emprestimo
+AFTER INSERT ON Emprestimo_Livro
+FOR EACH ROW
+BEGIN
+    UPDATE Livro 
+    SET situacao = 'Emprestado' 
+    WHERE id_livro = NEW.id_livro;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE TRIGGER tg_validar_disponibilidade_livro
+BEFORE INSERT ON Emprestimo_Livro
+FOR EACH ROW
+BEGIN
+    DECLARE v_situacao VARCHAR(20);
+
+    SELECT situacao INTO v_situacao FROM Livro WHERE id_livro = NEW.id_livro;
+
+    IF v_situacao <> 'Disponível' THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Operação cancelada: O livro não está disponível para empréstimo.';
+    END IF;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE TRIGGER tg_registrar_devolucao
+AFTER UPDATE ON Emprestimo
+FOR EACH ROW
+BEGIN
+    -- Verifica se a data de devolução foi preenchida agora
+    IF NEW.data_devolucao IS NOT NULL AND OLD.data_devolucao IS NULL THEN
+        -- Atualiza todos os livros vinculados a esse empréstimo para 'Disponível'
+        UPDATE Livro 
+        SET situacao = 'Disponível'
+        WHERE id_livro IN (SELECT id_livro FROM Emprestimo_Livro WHERE id_emprestimo = NEW.id_emprestimo);
+    END IF;
+END //
+
+DELIMITER ;
