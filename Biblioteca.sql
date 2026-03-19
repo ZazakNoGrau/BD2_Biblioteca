@@ -180,6 +180,15 @@ SELECT * FROM vw_emprestimos_bibliotecarios;
 CREATE VIEW vw_emprestimos_alunos AS
 SELECT
     Emprestimo.id_emprestimo,
+    Pessoa.nome AS aluno,
+    Emprestimo.data_retirada,
+    Emprestimo.data_prevista,
+    Emprestimo.data_devolucao
+FROM Emprestimo
+JOIN Aluno ON Emprestimo.id_aluno = Aluno.id_pessoa
+JOIN Pessoa ON Aluno.id_pessoa = Pessoa.id_pessoa;
+
+SELECT * FROM vw_emprestimos_alunos;
 
 
 DELIMITER //
